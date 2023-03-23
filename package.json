@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/Squads-Protocol/sdk-examples#readme",
   "dependencies": {
+    "@solana/spl-token": "^0.3.7",
     "@solana/web3.js": "^1.73.3",
     "@sqds/sdk": "^2.0.4",
     "@types/bn.js": "^5.1.1",
