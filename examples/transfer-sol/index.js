@@ -1,5 +1,5 @@
 "use strict";
-// Programmatic example of creating a Squad with 3 members, creating a mint, assigning the authority to the vault and minting a token
+// Programmatic example of creating a Squad
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -41,12 +41,8 @@ const web3_js_1 = require("@solana/web3.js");
 const sdk_2 = require("@sqds/sdk");
 const bn_js_1 = __importDefault(require("bn.js"));
 const functions_1 = require("../functions");
-const spl_token_1 = require("@solana/spl-token");
 const walletKeypair = web3_js_1.Keypair.generate();
 const squads = sdk_1.default.devnet(new sdk_2.Wallet(walletKeypair));
-// it is highly recommended that you use a different RPC NODE ie.
-// const squads = Squads.endpoint(YOUR_RPC_NODE, new Wallet(walletKeypair));
-// creates a multisig with 1 signer and a single member using the immediate function
 const createSquad = (members, threshold) => __awaiter(void 0, void 0, void 0, function* () {
     const createKey = walletKeypair.publicKey;
     const name = 'Test Squad';
@@ -64,9 +60,7 @@ const createSquad = (members, threshold) => __awaiter(void 0, void 0, void 0, fu
         throw e;
     }
 });
-// for simplicity, all of the methods being used are immediate, so a new instance of the Squads SDK is instantiated for each "wallet"
-// note that some of the commitment levels fluctuate to accomodate devnet and immediacy
-const mintExample = () => __awaiter(void 0, void 0, void 0, function* () {
+const transferSol = () => __awaiter(void 0, void 0, void 0, function* () {
     // airdrop to fund the wallet - may fail occasionally since it defaults to public devnet
     yield (0, functions_1.airdrop)(squads.connection, walletKeypair.publicKey, web3_js_1.LAMPORTS_PER_SOL);
     const payerBalance = yield squads.connection.getBalance(walletKeypair.publicKey, "confirmed");
@@ -79,21 +73,19 @@ const mintExample = () => __awaiter(void 0, void 0, void 0, function* () {
     const initMembers = [walletKeypair.publicKey, ...otherMembersBesidesWallet.map(kp => kp.publicKey)];
     const initThreshold = 2;
     const { multisigPublicKey, vaultPublicKey } = yield createSquad(initMembers, initThreshold);
+    // airdrop 1 SOL to the vault
     yield (0, functions_1.airdrop)(squads.connection, vaultPublicKey, web3_js_1.LAMPORTS_PER_SOL);
-    // Create a mint, and assign the authority to the vault
-    const newMint = yield (0, spl_token_1.createMint)(squads.connection, walletKeypair, vaultPublicKey, vaultPublicKey, 0, undefined, { commitment: 'processed', skipPreflight: true });
-    console.log("New mint created at ", newMint.toBase58());
-    // wallet that will get the minted token
+    // wallet that will get SOL
     const recipientWallet = web3_js_1.Keypair.generate().publicKey;
-    // will need to create an ata for this wallet
-    const recipientTokenAccount = yield (0, spl_token_1.createAssociatedTokenAccount)(squads.connection, walletKeypair, newMint, recipientWallet, { commitment: "confirmed" });
-    console.log("Recipient token account created at ", recipientTokenAccount.toBase58());
-    // Create a multisig instruction to mint a token and send it to the recipient wallet
-    const mintTokenInstruction = yield (0, spl_token_1.createMintToInstruction)(newMint, recipientTokenAccount, vaultPublicKey, 1);
     // create the multisig transaction - use default authority Vault (1)
     const multisigTransaction = yield squads.createTransaction(multisigPublicKey, 1);
+    const transferSolIx = yield web3_js_1.SystemProgram.transfer({
+        fromPubkey: vaultPublicKey,
+        toPubkey: recipientWallet,
+        lamports: web3_js_1.LAMPORTS_PER_SOL / 2, // send .5 SOL
+    });
     // add the instruction to the transaction
-    const ixRes = yield squads.addInstruction(multisigTransaction.publicKey, mintTokenInstruction);
+    const ixRes = yield squads.addInstruction(multisigTransaction.publicKey, transferSolIx);
     console.log('Instruction added to transaction:', JSON.stringify(ixRes));
     // activate the transaction so all members can vote on it
     yield squads.activateTransaction(multisigTransaction.publicKey);
@@ -120,7 +112,7 @@ const mintExample = () => __awaiter(void 0, void 0, void 0, function* () {
     const postExecuteState = yield squads.getTransaction(multisigTransaction.publicKey);
     console.log('Transaction state:', postExecuteState.status);
     // now we should be able to see that the recipient wallet has a token
-    const receipientTokenAccountValue = yield squads.connection.getTokenAccountBalance(recipientTokenAccount, "processed");
-    console.log('Recipient token account balance:', receipientTokenAccountValue.value.uiAmount);
+    const receipientAccountValue = yield squads.connection.getBalance(recipientWallet, "processed");
+    console.log('Recipient token account balance:', receipientAccountValue);
 });
-mintExample();
+transferSol();
