@@ -11,6 +11,8 @@ import { createAssociatedTokenAccount, createMint, createMintToInstruction } fro
 
 const walletKeypair = Keypair.generate();
 const squads = Squads.devnet(new Wallet(walletKeypair));
+// it is highly recommended that you use a different RPC NODE ie.
+// const squads = Squads.endpoint(YOUR_RPC_NODE, new Wallet(walletKeypair));
 
 // creates a multisig with 1 signer and a single member using the immediate function
 const createSquad = async (members: PublicKey[], threshold: number) => {
@@ -33,9 +35,13 @@ const createSquad = async (members: PublicKey[], threshold: number) => {
 };
 
 // for simplicity, all of the methods being used are immediate, so a new instance of the Squads SDK is instantiated for each "wallet"
+// note that some of the commitment levels fluctuate to accomodate devnet and immediacy
 const mintExample = async () => {
     // airdrop to fund the wallet - may fail occasionally since it defaults to public devnet
     await airdrop(squads.connection, walletKeypair.publicKey, LAMPORTS_PER_SOL);
+    const payerBalance = await squads.connection.getBalance(walletKeypair.publicKey, "confirmed");
+    // validate airdrop
+    console.log(payerBalance);
 
     const otherMembersBesidesWallet = [
         Keypair.generate(),
@@ -55,23 +61,28 @@ const mintExample = async () => {
     // wallet that will get the minted token
     const recipientWallet = Keypair.generate().publicKey;
     // will need to create an ata for this wallet
-    const recipientTokenAccount = await createAssociatedTokenAccount(squads.connection, walletKeypair, newMint, recipientWallet);
+
+    const recipientTokenAccount = await createAssociatedTokenAccount(squads.connection, walletKeypair, newMint, recipientWallet, {commitment:"confirmed"});
     console.log("Recipient token account created at ", recipientTokenAccount.toBase58());
 
+
     // Create a multisig instruction to mint a token and send it to the recipient wallet
-    const mintTokenInstruction = await createMintToInstruction(newMint, recipientWallet, vaultPublicKey, 1);
+    const mintTokenInstruction = await createMintToInstruction(newMint, recipientTokenAccount, vaultPublicKey, 1);
 
     // create the multisig transaction - use default authority Vault (1)
     const multisigTransaction = await squads.createTransaction(multisigPublicKey, 1);
 
     // add the instruction to the transaction
-    await squads.addInstruction(multisigTransaction.publicKey, mintTokenInstruction);
+    const ixRes = await squads.addInstruction(multisigTransaction.publicKey, mintTokenInstruction);
+    console.log('Instruction added to transaction:', JSON.stringify(ixRes));
 
     // activate the transaction so all members can vote on it
     await squads.activateTransaction(multisigTransaction.publicKey);
 
     // vote on the transaction
     await squads.approveTransaction(multisigTransaction.publicKey);
+    const firstTxState = await squads.getTransaction(multisigTransaction.publicKey);
+    console.log('Transaction state:', firstTxState.status);
 
     // still need one more approval from another member, so we'll use the other member's wallet
     const otherMemberWallet = new Wallet(otherMembersBesidesWallet[0]);
@@ -92,9 +103,10 @@ const mintExample = async () => {
 
     // execute the transaction
     await executorMemberSquads.executeTransaction(multisigTransaction.publicKey);
-
+    const postExecuteState = await squads.getTransaction(multisigTransaction.publicKey);
+    console.log('Transaction state:', postExecuteState.status);
     // now we should be able to see that the recipient wallet has a token
-    const receipientTokenAccountValue = await squads.connection.getTokenAccountBalance(recipientTokenAccount);
+    const receipientTokenAccountValue = await squads.connection.getTokenAccountBalance(recipientTokenAccount, "processed");
     console.log('Recipient token account balance:', receipientTokenAccountValue.value.uiAmount);
 };
 

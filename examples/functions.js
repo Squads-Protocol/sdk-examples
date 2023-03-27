@@ -14,7 +14,7 @@ exports.airdrop = void 0;
 const airdrop = (connection, address, amount) => __awaiter(void 0, void 0, void 0, function* () {
     const airdropSig = yield connection.requestAirdrop(address, amount);
     console.log("Airdrop sig", airdropSig);
-    yield connection.confirmTransaction(airdropSig, "processed");
+    yield connection.confirmTransaction(airdropSig, "confirmed");
     return airdropSig;
 });
 exports.airdrop = airdrop;
