@@ -1,0 +1,22 @@
+{
+    "name": "NFT SDK Example",
+    "description": "Example NFT",
+    "image": "https://raw.githubusercontent.com/Squads-Protocol/sdk-examples/3fe616b3c9740c4aa4d9daf6fb3372b4053bd07f/examples/nft-collections/logo.jpeg",
+    "animation_url": "",
+    "external_url": "https://github.com/Squads-Protocol/sdk-examples/examples/nft-collections",
+    "attributes": [
+        {
+            "trait_type": "Trait",
+            "value": "You ran the SDK!"
+        }
+    ],
+    "properties": {
+        "files": [
+            {
+                "uri": "https://raw.githubusercontent.com/Squads-Protocol/sdk-examples/3fe616b3c9740c4aa4d9daf6fb3372b4053bd07f/examples/nft-collections/logo.jpeg",
+                "type": "image/jpeg"
+            }
+        ],
+        "category": "image"
+    }
+}
