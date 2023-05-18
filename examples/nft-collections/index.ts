@@ -22,10 +22,10 @@ const NFT_URI = 'https://raw.githubusercontent.com/Squads-Protocol/sdk-examples/
 
 /*
   // for fewer potential issues, you should use a CLI wallet instead of a random keypair that's been airdropped to
+  const homedir = os.homedir();
   let walletJSON = JSON.parse(fs.readFileSync(`${homedir}/.config/solana/id.json`, "utf-8"));
   const walletKeypair = Keypair.fromSecretKey(Uint8Array.from(walletJSON));
   const squads = Squads.endpoint(YOUR_RPC_NODE, new Wallet(walletKeypair));
-  const homedir = os.homedir();
 */
 
 // if using this random keypair for the test, be sure to airdrop to it using the airdrop function in this repo
