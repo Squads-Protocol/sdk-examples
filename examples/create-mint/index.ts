@@ -16,8 +16,8 @@ const squads = Squads.devnet(new Wallet(walletKeypair));
 
 // creates a multisig with 1 signer and a single member using the immediate function
 const createSquad = async (members: PublicKey[], threshold: number) => {
-
-    const createKey = walletKeypair.publicKey;
+    // random key so no collision
+    const createKey = new Keypair().publicKey;
     const name = 'Test Squad';
     const description = 'This is a test squad';
     

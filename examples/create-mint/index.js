@@ -48,7 +48,8 @@ const squads = sdk_1.default.devnet(new sdk_2.Wallet(walletKeypair));
 // const squads = Squads.endpoint(YOUR_RPC_NODE, new Wallet(walletKeypair));
 // creates a multisig with 1 signer and a single member using the immediate function
 const createSquad = (members, threshold) => __awaiter(void 0, void 0, void 0, function* () {
-    const createKey = walletKeypair.publicKey;
+    // random key so no collision
+    const createKey = new web3_js_1.Keypair().publicKey;
     const name = 'Test Squad';
     const description = 'This is a test squad';
     try {

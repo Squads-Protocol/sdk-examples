@@ -44,7 +44,8 @@ const functions_1 = require("../functions");
 const walletKeypair = web3_js_1.Keypair.generate();
 const squads = sdk_1.default.devnet(new sdk_2.Wallet(walletKeypair));
 const createSquad = (members, threshold) => __awaiter(void 0, void 0, void 0, function* () {
-    const createKey = walletKeypair.publicKey;
+    // random key so no collision
+    const createKey = new web3_js_1.Keypair().publicKey;
     const name = 'Test Squad';
     const description = 'This is a test squad';
     try {
@@ -113,6 +114,6 @@ const transferSol = () => __awaiter(void 0, void 0, void 0, function* () {
     console.log('Transaction state:', postExecuteState.status);
     // now we should be able to see that the recipient wallet has a token
     const receipientAccountValue = yield squads.connection.getBalance(recipientWallet, "processed");
-    console.log('Recipient token account balance:', receipientAccountValue);
+    console.log('Recipient token account balance:', receipientAccountValue / web3_js_1.LAMPORTS_PER_SOL);
 });
 transferSol();

@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/Squads-Protocol/sdk-examples#readme",
   "dependencies": {
+    "@metaplex-foundation/js": "^0.19.3",
     "@solana/spl-token": "^0.3.7",
     "@solana/web3.js": "^1.73.3",
     "@sqds/sdk": "^2.0.4",

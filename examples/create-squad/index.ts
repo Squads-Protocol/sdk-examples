@@ -13,7 +13,8 @@ const createSquadExample = async () => {
     const walletKeypair = Keypair.generate();
         
     const squads = Squads.devnet(new Wallet(walletKeypair));
-    const createKey = walletKeypair.publicKey;
+    // random key so no collision
+    const createKey = new Keypair().publicKey;
     const threshold = 1;
     const members = [walletKeypair.publicKey];
     const name = 'Test Squad';

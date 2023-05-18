@@ -45,7 +45,8 @@ const functions_1 = require("../functions");
 const createSquadExample = () => __awaiter(void 0, void 0, void 0, function* () {
     const walletKeypair = web3_js_1.Keypair.generate();
     const squads = sdk_1.default.devnet(new sdk_2.Wallet(walletKeypair));
-    const createKey = walletKeypair.publicKey;
+    // random key so no collision
+    const createKey = new web3_js_1.Keypair().publicKey;
     const threshold = 1;
     const members = [walletKeypair.publicKey];
     const name = 'Test Squad';
