@@ -170,14 +170,14 @@ const collectionAndNewNFTExample = () => __awaiter(void 0, void 0, void 0, funct
     });
     const { blockhash, lastValidBlockHeight } = yield squads.connection.getLatestBlockhash("confirmed");
     const executeTx = new web3_js_1.Transaction({
-        feePayer: walletKeypair.publicKey,
+        feePayer: otherMembersBesidesWallet[0].publicKey,
         blockhash,
         lastValidBlockHeight,
     });
     executeTx.add(computeIx);
     executeTx.add(executeIx);
     // sign & serialize and send
-    executeTx.sign(walletKeypair);
+    executeTx.sign(otherMembersBesidesWallet[0]);
     const txid = yield squads.connection.sendRawTransaction(executeTx.serialize(), { skipPreflight: true, preflightCommitment: 'confirmed' });
     console.log("sent execute tx!", txid);
     console.log("finished, check the added nft mint at", newNftMint.toBase58());
